@@ -22,7 +22,7 @@ undef $/;
 $doc =~ m/(\s*<scm>.*?<\/scm>\s*)/sm;
 my ($prescm, $scmblock, $postscm) = ($`, $1, $');
 
-#print "[$scmblock]";
+#print "initial scm block [$scmblock]";
 
 # Convert from this:
 #    <scm>
@@ -41,24 +41,27 @@ my ($prescm, $scmblock, $postscm) = ($`, $1, $');
 #    <tag>HEAD</tag>
 #  </scm>
 
-my ($url) = $scmblock =~ m/<url>\s*(.*?)\s*<\/url>/;
-my ($connection) = $scmblock =~ m/<connection>\s*(.*?)\s*<\/connection>/;
-my ($developerConnection) = $scmblock =~ m/<developerConnection>\s*(.*?)\s*<\/developerConnection>/;
+my ($url) = $scmblock =~ m/<url>\s*(\S*?)\s*<\/url>/sm;
+my ($connection) = $scmblock =~ m/<connection>\s*(\S*?)\s*<\/connection>/sm;
+my ($developerConnection) = $scmblock =~ m/<developerConnection>\s*(\S*?)\s*<\/developerConnection>/sm;
 
+#print "url [$url]\n";
 $url =~ s/bitbucket.org/github.com/;
 $url .= '.git';
 
+#print "connection [$connection]\n";
 $connection =~ s-scm:hg:https://bitbucket.org-scm:git:https://github.com-;
 $connection .= '.git';
 
+#print "developerConnection [$developerConnection]\n";
 $developerConnection =~ s-scm:hg:https://bitbucket.org/-scm:git:git\@github.com:-;
 $developerConnection .= '.git';
 
-$scmblock =~ s-<url>.*?</url>-<url>$url</url>-;
-$scmblock =~ s-<connection>.*?</connection>-<connection>$connection</connection>-;
-$scmblock =~ s-<developerConnection>.*?</developerConnection>-<developerConnection>$developerConnection</developerConnection>-;
+$scmblock =~ s-<url>.*?</url>-<url>$url</url>-s;
+$scmblock =~ s-<connection>.*?</connection>-<connection>$connection</connection>-s;
+$scmblock =~ s-<developerConnection>.*?</developerConnection>-<developerConnection>$developerConnection</developerConnection>-s;
 
-#print "[$scmblock]";
+#print "transformed scm block [$scmblock]\n";
 
 open (my $nfh, ">", "$pom") or die "Can't create $pom: $!\n";
 print $nfh ($prescm . $scmblock . $postscm);
