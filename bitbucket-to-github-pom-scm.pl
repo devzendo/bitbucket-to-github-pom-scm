@@ -22,6 +22,8 @@ undef $/;
 $doc =~ m/(\s*<scm>.*?<\/scm>\s*)/sm;
 my ($prescm, $scmblock, $postscm) = ($`, $1, $');
 
+die "There is no SCM block in this pom.xml\n" unless ($scmblock);
+
 #print "initial scm block [$scmblock]";
 
 # Convert from this:
